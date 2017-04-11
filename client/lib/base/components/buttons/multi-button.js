@@ -33,9 +33,12 @@ function MultiButton(options) {
           <ul className="dropdown">
             {
               this.choices.map(c => {
-                return <li className="entry" onMouseup={ c.action } ref={ c.id }>
-                  { c.label }
-                </li>;
+                if (!c)
+                  return null;
+                else
+                  return <li className="entry" onMouseup={c.action } ref={c.id }>
+                      { c.label }
+                    </li>;
               })
             }
           </ul>
@@ -74,7 +77,7 @@ function getPrimaryAction(isDisabled, choices) {
   }
 
   primaryChoices = choices.filter(function(c) {
-    return c.primary;
+    return c && c.primary;
   });
 
   if (primaryChoices.length !== 1) {

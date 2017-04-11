@@ -37,6 +37,10 @@ var ensureOpts = require('util/ensure-opts'),
 
 var debug = require('debug')('app');
 
+const fs = require('fs');
+const AdmZip = require('adm-zip');
+const Buffer = global.Buffer;
+
 
 /**
  * The main application entry point
@@ -555,6 +559,41 @@ App.prototype.openDiagram = function() {
   });
 };
 
+App.prototype.openWar = function() {
+
+  var dialog = this.dialog;
+
+  var cwd = getFilePath(this.activeTab);
+
+  dialog.open(cwd, (err, files) => {
+    if (err) {
+      return dialog.openError(err, function() {
+        debug('open-war canceled: %s', err);
+      });
+    }
+
+    if (!files) {
+      return debug('open-war canceled: no file');
+    }
+    let newFiles = [];
+    files.forEach(function (item) {
+      let zip = new AdmZip(item.path);
+      let zipEntries = zip.getEntries();
+      zipEntries.forEach(function(zipEntry) {
+        console.log(zipEntry.toString()); // outputs zip entries information
+        if (zipEntry.name.endsWith('.bpmn')) {
+          newFiles.push({
+            contents: zipEntry.getData().toString('utf-8'),
+            name: zipEntry.name,
+            lastModified : item.lastModifyDate
+          });
+        }
+      });
+    })
+
+    this.openFiles(newFiles);
+  });
+};
 
 App.prototype.triggerAction = function(action, options) {
 
@@ -593,6 +632,10 @@ App.prototype.triggerAction = function(action, options) {
 
   if (action === 'open-diagram') {
     return this.openDiagram();
+  }
+
+  if (action === 'open-war') {
+    return this.openWar();
   }
 
   if (action === 'save-all') {
@@ -967,8 +1010,11 @@ App.prototype.saveFile = function(file, saveAs, done) {
     }
 
     debug('save file %s as %s', file.name, suggestedFile.path);
-
-    fileSystem.writeFile(assign({}, file, suggestedFile), handleFileError);
+    if (file.buffer) {
+      fs.writeFile(suggestedFile.path, file.buffer, handleFileError);
+    } else {
+      fileSystem.writeFile(assign({}, file, suggestedFile), handleFileError);
+    }
   });
 };
 

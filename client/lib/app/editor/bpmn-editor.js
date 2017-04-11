@@ -1,36 +1,33 @@
 'use strict';
 
-var inherits = require('inherits');
+const inherits = require('inherits');
+const assign = require('lodash/object/assign');
+const domify = require('domify');
+const DiagramEditor = require('./diagram-editor');
+const BpmnJS = require('bpmn-js/lib/Modeler');
 
-var assign = require('lodash/object/assign');
-
-var domify = require('domify');
-
-var DiagramEditor = require('./diagram-editor');
-
-var BpmnJS = require('bpmn-js/lib/Modeler');
-
-var diagramOriginModule = require('diagram-js-origin'),
+const diagramOriginModule = require('diagram-js-origin'),
     executableFixModule = require('./bpmn/executable-fix'),
     clipboardModule = require('./bpmn/clipboard'),
     propertiesPanelModule = require('bpmn-js-properties-panel'),
     propertiesProviderModule = require('bpmn-js-properties-panel/lib/provider/camunda'),
     camundaModdlePackage = require('camunda-bpmn-moddle/resources/camunda');
 
-var WarningsOverlay = require('base/components/warnings-overlay');
+const WarningsOverlay = require('base/components/warnings-overlay');
 
-var isUnsaved = require('util/file/is-unsaved');
+const isUnsaved = require('util/file/is-unsaved');
 
-var getWarnings = require('app/util/get-warnings');
+const getWarnings = require('app/util/get-warnings');
 
-var ensureOpts = require('util/ensure-opts'),
+const ensureOpts = require('util/ensure-opts'),
     dragger = require('util/dom/dragger'),
     isInputActive = require('util/dom/is-input').active,
     copy = require('util/copy');
 
-var generateImage = require('app/util/generate-image');
+const generateImage = require('app/util/generate-image');
+const generateWar = require('app/util/generate-war');
 
-var debug = require('debug')('bpmn-editor');
+const debug = require('debug')('bpmn-editor');
 
 
 /**
@@ -64,7 +61,7 @@ function BpmnEditor(options) {
 
   // set current modeler version and name to the diagram
   this.on('save', () => {
-    var definitions = this.getModeler().definitions;
+    let definitions = this.getModeler().definitions;
 
     if (definitions) {
       definitions.exporter = options.metaData.name;
@@ -78,12 +75,10 @@ inherits(BpmnEditor, DiagramEditor);
 module.exports = BpmnEditor;
 
 
-BpmnEditor.prototype.triggerEditorActions = function(action, options) {
-  var opts = options || {};
-
-  var modeler = this.getModeler();
-
-  var editorActions = modeler.get('editorActions', false);
+BpmnEditor.prototype.triggerEditorActions = function(action, options = {}) {
+  let opts = options,
+    modeler = this.getModeler(),
+    editorActions = modeler.get('editorActions', false);
 
   if (!editorActions) {
     return;
@@ -158,7 +153,7 @@ BpmnEditor.prototype.triggerEditorActions = function(action, options) {
 
 BpmnEditor.prototype.updateState = function() {
 
-  var modeler = this.getModeler(),
+  let modeler = this.getModeler(),
       initialState = this.initialState,
       commandStack,
       inputActive;
@@ -168,16 +163,16 @@ BpmnEditor.prototype.updateState = function() {
     return;
   }
 
-  var elementsSelected,
+  let elementsSelected,
       elements,
       dirty;
 
-  var stateContext = {
+  let stateContext = {
     bpmn: true,
     undo: !!initialState.undo,
     redo: !!initialState.redo,
     dirty: initialState.dirty,
-    exportAs: [ 'png', 'jpeg', 'svg' ]
+    exportAs: [ 'png', 'jpeg', 'svg', 'war' ]
   };
 
   // no diagram to harvest, good day maam!
@@ -217,7 +212,7 @@ BpmnEditor.prototype.updateState = function() {
 };
 
 BpmnEditor.prototype.getStackIndex = function() {
-  var modeler = this.getModeler();
+  const modeler = this.getModeler();
 
   return isImported(modeler) ? modeler.get('commandStack')._stackIdx : -1;
 };
@@ -236,9 +231,9 @@ BpmnEditor.prototype.unmountProperties = function(node) {
 
 BpmnEditor.prototype.resizeProperties = function onDrag(panelLayout, event, delta) {
 
-  var oldWidth = panelLayout.open ? panelLayout.width : 0;
+  const oldWidth = panelLayout.open ? panelLayout.width : 0;
 
-  var newWidth = Math.max(oldWidth + delta.x * -1, 0);
+  const newWidth = Math.max(oldWidth + delta.x * -1, 0);
 
   this.emit('layout:changed', {
     propertiesPanel: {
@@ -252,7 +247,7 @@ BpmnEditor.prototype.resizeProperties = function onDrag(panelLayout, event, delt
 
 BpmnEditor.prototype.toggleProperties = function() {
 
-  var config = this.layout.propertiesPanel;
+  const config = this.layout.propertiesPanel;
 
   this.emit('layout:changed', {
     propertiesPanel: {
@@ -306,18 +301,18 @@ BpmnEditor.prototype.getModeler = function() {
 
 BpmnEditor.prototype.loadTemplates = function(done) {
 
-  var file = this.file;
+  const file = this.file;
 
-  var diagram = isUnsaved(file) ? null : { path: file.path };
+  const diagram = isUnsaved(file) ? null : { path: file.path };
 
   this.config.get('bpmn.elementTemplates', diagram, done);
 };
 
 BpmnEditor.prototype.createModeler = function($el, $propertiesEl) {
 
-  var elementTemplatesLoader = this.loadTemplates.bind(this);
+  const elementTemplatesLoader = this.loadTemplates.bind(this);
 
-  var propertiesPanelConfig = {
+  const propertiesPanelConfig = {
     'config.propertiesPanel': [ 'value', { parent: $propertiesEl } ]
   };
 
@@ -338,10 +333,23 @@ BpmnEditor.prototype.createModeler = function($el, $propertiesEl) {
 };
 
 BpmnEditor.prototype.exportAs = function(type, done) {
-  var modeler = this.getModeler();
-
+  let modeler = this.getModeler();
+  if (type == 'war') {
+    let file = {};
+    try {
+      this.saveXML((err, xml) => {
+        if (err) {
+          debug('[#showEditor] editor export error %s', err);
+        }}
+      );
+      assign(file, { contents: '', buffer : generateWar(this.newXML, this.file) });
+    } catch (err) {
+      return done(err);
+    }
+    return done(null, file);
+  }
   modeler.saveSVG((err, svg) => {
-    var file = {};
+    let file = {};
 
     if (err) {
       return done(err);
@@ -363,7 +371,7 @@ BpmnEditor.prototype.exportAs = function(type, done) {
 
 // trigger the palette resizal whenever we focus a tab or the layout is updated
 BpmnEditor.prototype.resize = function() {
-  var modeler = this.getModeler(),
+  let modeler = this.getModeler(),
       canvas = modeler.get('canvas');
 
   canvas.resized();
@@ -371,13 +379,13 @@ BpmnEditor.prototype.resize = function() {
 
 BpmnEditor.prototype.render = function() {
 
-  var propertiesLayout = this.layout.propertiesPanel;
+  let propertiesLayout = this.layout.propertiesPanel;
 
-  var propertiesStyle = {
+  let propertiesStyle = {
     width: (propertiesLayout.open ? propertiesLayout.width : 0) + 'px'
   };
 
-  var warnings = getWarnings(this.lastImport);
+  let warnings = getWarnings(this.lastImport);
 
   return (
     <div className="bpmn-editor"
@@ -413,7 +421,7 @@ BpmnEditor.prototype.render = function() {
 
 BpmnEditor.prototype.logTemplateWarnings = function(warnings) {
 
-  var messages = warnings.map(function(warning) {
+  let messages = warnings.map(function(warning) {
     return [ 'warning', '> ' + warning.message ];
   });
 
@@ -432,7 +440,7 @@ BpmnEditor.prototype.logTemplateWarnings = function(warnings) {
  */
 BpmnEditor.prototype.notifyModeler = function(eventName) {
 
-  var modeler = this.getModeler();
+  let modeler = this.getModeler();
 
   try {
     modeler.get('eventBus').fire(eventName);

@@ -9,7 +9,7 @@ var EXTENSIONS = {
   },
   supported: {
     name: 'All supported',
-    extensions: [ 'bpmn', 'dmn', 'cmmn', 'xml' ]
+    extensions: [ 'bpmn', 'dmn', 'cmmn', 'xml','war' ]
   },
   images: {
     name: 'All images',
@@ -17,7 +17,7 @@ var EXTENSIONS = {
   },
   bpmn: {
     name: 'BPMN diagram',
-    extensions: [ 'bpmn', 'xml' ]
+    extensions: [ 'bpmn', 'xml', 'war' ]
   },
   dmn: {
     name: 'DMN table',
@@ -38,6 +38,10 @@ var EXTENSIONS = {
   svg: {
     name: 'SVG Image',
     extensions: ['svg']
+  },
+  war: {
+    name: 'WAR File',
+    extensions: ['war']
   }
 };
 

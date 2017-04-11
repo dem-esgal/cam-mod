@@ -1,16 +1,11 @@
 'use strict';
 
-var inherits = require('inherits');
-
-var debounce = require('lodash/function/debounce');
-
-var BaseEditor = require('./base-editor');
-
-var debug = require('debug')('diagram-editor');
-
-var needsOverride = require('util/needs-override');
-
-var getWarnings = require('app/util/get-warnings');
+const inherits = require('inherits'),
+  debounce = require('lodash/function/debounce'),
+  BaseEditor = require('./base-editor'),
+  debug = require('debug')('diagram-editor'),
+  needsOverride = require('util/needs-override'),
+  getWarnings = require('app/util/get-warnings');
 
 
 /**
@@ -23,10 +18,10 @@ function DiagramEditor(options) {
   BaseEditor.call(this, options);
 
   this.on('imported', (context) => {
-    var xml = context.xml,
+    let xml = context.xml,
         warnings = context.warnings;
 
-    var initialState = this.initialState;
+    let initialState = this.initialState;
 
     // we are back at start, unset reimport flag
     if (xml === initialState.xml) {
@@ -46,7 +41,7 @@ function DiagramEditor(options) {
   });
 
   this.on('updated', (context) => {
-    var modeler = this.modeler,
+    let modeler = this.modeler,
         initialState = this.initialState;
 
     // log stack index on first imported
@@ -62,7 +57,7 @@ function DiagramEditor(options) {
   });
 
   this.on('layout:update', function(evt) {
-    var log = evt.log;
+    let log = evt.log;
 
     if (log && log.cleared) {
       this.hideWarnings();
@@ -92,7 +87,7 @@ DiagramEditor.prototype.update = function() {
     return;
   }
 
-  var modeler = this.getModeler(),
+  let modeler = this.getModeler(),
       lastXML = this.lastXML,
       newXML = this.newXML;
 
@@ -113,7 +108,7 @@ DiagramEditor.prototype.update = function() {
 
   modeler.importXML(newXML, (err, warnings) => {
 
-    var importContext = this.lastImport = {
+    let importContext = this.lastImport = {
       error: err,
       warnings: warnings,
       xml: newXML
@@ -129,7 +124,7 @@ DiagramEditor.prototype.update = function() {
 
 
 DiagramEditor.prototype.destroy = function() {
-  var modeler = this.getModeler();
+  let modeler = this.getModeler();
 
   if (modeler.destroy) {
     modeler.destroy();
@@ -138,7 +133,7 @@ DiagramEditor.prototype.destroy = function() {
 
 // This allows an easier replacing of this method f.ex: DMN needs
 DiagramEditor.prototype.saveXML = function(done) {
-  var modeler = this.getModeler(),
+  let modeler = this.getModeler(),
       commandStack = modeler.get('commandStack');
 
   this._saveXML(modeler, commandStack._stackIdx, done);
@@ -147,15 +142,15 @@ DiagramEditor.prototype.saveXML = function(done) {
 
 DiagramEditor.prototype._saveXML = function(modeler, commandStackIdx, done) {
 
-  var initialState = this.initialState;
+  let initialState = this.initialState;
 
   debug('[#saveXML] save');
 
   this.emit('save');
 
-  var savedCallback = (err, xml) => {
+  let savedCallback = (err, xml) => {
 
-    var saveContext = { error: err, xml: xml };
+    let saveContext = { error: err, xml: xml };
 
     debug('[#saveXML] saved', saveContext);
 
@@ -180,7 +175,7 @@ DiagramEditor.prototype._saveXML = function(modeler, commandStackIdx, done) {
 
 DiagramEditor.prototype.triggerAction = function(action, options) {
 
-  var modeler = this.getModeler();
+  let modeler = this.getModeler();
 
   if (action === 'undo') {
     return modeler.get('commandStack').undo();
@@ -211,13 +206,13 @@ DiagramEditor.prototype.resize = function() {
 
 DiagramEditor.prototype.showWarnings = function() {
 
-  var warnings = getWarnings(this.lastImport);
+  let warnings = getWarnings(this.lastImport);
 
   if (!warnings) {
     return;
   }
 
-  var messages = warnings.map(function(warning) {
+  let messages = warnings.map(function(warning) {
     return [ 'warning', '> ' + warning.message ];
   });
 
@@ -251,7 +246,7 @@ DiagramEditor.prototype.openLog = function() {
 
 
 function warningsStr(warnings) {
-  var count = warnings.length;
+  let count = warnings.length;
 
   return count + ' warning' + (count !== 1 ? 's' : '');
 }

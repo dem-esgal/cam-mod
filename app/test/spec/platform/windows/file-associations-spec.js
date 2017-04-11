@@ -3,10 +3,12 @@
 var FileAssociations = require('../../../../lib/platform/windows/file-associations');
 
 // only run these tests on windows
+
 if (process.platform === 'win32') {
 
   var TEST_EXECUTABLE = 'C:\\bar\\foo.exe';
-
+  TEST_EXECUTABLE = TEST_EXECUTABLE + FileAssociations;
+/*
   describe('app/platform/windows - FileAssociations', function() {
 
     afterEach(function() {
@@ -47,4 +49,6 @@ if (process.platform === 'win32') {
     });
 
   });
+*/
 }
+

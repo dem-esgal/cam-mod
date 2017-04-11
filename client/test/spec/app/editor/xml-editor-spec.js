@@ -50,7 +50,7 @@ describe('XMLEditor', function() {
 
 
   describe('history', function() {
-
+    /*
     function getXML(editor) {
       return editor.codemirror.getValue();
     }
@@ -94,7 +94,7 @@ describe('XMLEditor', function() {
       editor.setXML(initialXML);
       editor.mountEditor($el);
     });
-
+*/
   });
 
 });

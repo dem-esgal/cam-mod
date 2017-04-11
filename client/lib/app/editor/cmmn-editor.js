@@ -148,7 +148,7 @@ CmmnEditor.prototype.updateState = function() {
     undo: !!initialState.undo,
     redo: !!initialState.redo,
     dirty: initialState.dirty,
-    exportAs: [ 'png', 'jpeg', 'svg' ]
+    exportAs: [ 'png', 'jpeg', 'svg','war' ]
   };
 
   if (isImported(modeler)) {

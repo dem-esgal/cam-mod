@@ -97,8 +97,14 @@ MenuBuilder.prototype.appendOpen = function() {
       app.emit('menu:action', 'open-diagram');
     }
   }));
-
-  this.appendReopenLastTab();
+  this.menu.append(new MenuItem({
+    label: 'Open War File...',
+    accelerator: 'CommandOrControl+W',
+    click: function() {
+      app.emit('menu:action', 'open-war');
+    }
+  }));
+  //this.appendReopenLastTab();
 
   return this;
 };
@@ -183,7 +189,15 @@ MenuBuilder.prototype.appendExportAs = function(submenu) {
       click: function() {
         app.emit('menu:action', 'export-tab', { type: 'svg' });
       }
-    }])
+    },
+    {
+      label: 'War',
+      enabled: canExport('war'),
+      click: function() {
+        app.emit('menu:action', 'export-tab', { type: 'war' });
+      }
+    }
+    ])
   }));
 
   this.appendSeparator();
