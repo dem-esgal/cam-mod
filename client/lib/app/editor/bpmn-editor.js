@@ -7,11 +7,11 @@ const DiagramEditor = require('./diagram-editor');
 const BpmnJS = require('bpmn-js/lib/Modeler');
 
 const diagramOriginModule = require('diagram-js-origin'),
-    executableFixModule = require('./bpmn/executable-fix'),
-    clipboardModule = require('./bpmn/clipboard'),
-    propertiesPanelModule = require('bpmn-js-properties-panel'),
-    propertiesProviderModule = require('bpmn-js-properties-panel/lib/provider/camunda'),
-    camundaModdlePackage = require('camunda-bpmn-moddle/resources/camunda');
+      executableFixModule = require('./bpmn/executable-fix'),
+      clipboardModule = require('./bpmn/clipboard'),
+      propertiesPanelModule = require('bpmn-js-properties-panel'),
+      propertiesProviderModule = require('bpmn-js-properties-panel/lib/provider/camunda'),
+      camundaModdlePackage = require('camunda-bpmn-moddle/resources/camunda');
 
 const WarningsOverlay = require('base/components/warnings-overlay');
 
@@ -20,9 +20,9 @@ const isUnsaved = require('util/file/is-unsaved');
 const getWarnings = require('app/util/get-warnings');
 
 const ensureOpts = require('util/ensure-opts'),
-    dragger = require('util/dom/dragger'),
-    isInputActive = require('util/dom/is-input').active,
-    copy = require('util/copy');
+      dragger = require('util/dom/dragger'),
+      isInputActive = require('util/dom/is-input').active,
+      copy = require('util/copy');
 
 const generateImage = require('app/util/generate-image');
 const generateWar = require('app/util/generate-war');
@@ -77,8 +77,8 @@ module.exports = BpmnEditor;
 
 BpmnEditor.prototype.triggerEditorActions = function(action, options = {}) {
   let opts = options,
-    modeler = this.getModeler(),
-    editorActions = modeler.get('editorActions', false);
+      modeler = this.getModeler(),
+      editorActions = modeler.get('editorActions', false);
 
   if (!editorActions) {
     return;

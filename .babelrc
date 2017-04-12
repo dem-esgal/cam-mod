@@ -1,4 +1,5 @@
 {
+  "sourceMap": "inline",
   "plugins": [
     "syntax-jsx",
     [ "transform-react-jsx", { "pragma": "h" } ],

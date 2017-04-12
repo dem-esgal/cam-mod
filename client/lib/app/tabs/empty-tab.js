@@ -8,7 +8,6 @@ var Tab = require('base/components/tab');
 
 var ensureOpts = require('util/ensure-opts');
 
-
 function EmptyTab(options) {
 
   if (!(this instanceof EmptyTab)) {

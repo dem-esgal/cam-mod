@@ -225,6 +225,8 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', [ 'lint', 'test', 'build-client', 'clean:distro', 'distro' ]);
 
+  grunt.registerTask('prod', [ 'lint', 'build-client', 'clean:distro', 'distro' ]);
+
   // Development setup tasks
   var server = require('electron-connect').server.create({ path: 'app/develop' });
 

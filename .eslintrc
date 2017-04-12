@@ -24,7 +24,7 @@
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
-    },
+    }
   },
   "plugins": [
     "react",

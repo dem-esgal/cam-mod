@@ -6,7 +6,8 @@ var assign = require('lodash/object/assign');
 
 var BpmnEditor = require('../../editor/bpmn-editor'),
     XMLEditor = require('../../editor/xml-editor'),
-    MultiEditorTab = require('../multi-editor-tab');
+    MultiEditorTab = require('../multi-editor-tab'),
+    FromEditor = require('../../editor/form-editor');
 
 var ensureOpts = require('util/ensure-opts');
 
@@ -29,7 +30,8 @@ function BpmnTab(options) {
   options = assign({
     editorDefinitions: [
       { id: 'diagram', label: 'Diagram', component: BpmnEditor },
-      { id: 'xml', label: 'XML', isFallback: true, component: XMLEditor }
+      { id: 'xml', label: 'XML', isFallback: true, component: XMLEditor },
+      { id: 'form-editor', label: 'Edit Form', isFallback: true, component: FromEditor }
     ]
   }, options);
 

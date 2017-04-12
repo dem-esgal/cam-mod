@@ -1,11 +1,11 @@
 'use strict';
 
 const inherits = require('inherits'),
-  debounce = require('lodash/function/debounce'),
-  BaseEditor = require('./base-editor'),
-  debug = require('debug')('diagram-editor'),
-  needsOverride = require('util/needs-override'),
-  getWarnings = require('app/util/get-warnings');
+      debounce = require('lodash/function/debounce'),
+      BaseEditor = require('./base-editor'),
+      debug = require('debug')('diagram-editor'),
+      needsOverride = require('util/needs-override'),
+      getWarnings = require('app/util/get-warnings');
 
 
 /**

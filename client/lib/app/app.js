@@ -39,7 +39,6 @@ var debug = require('debug')('app');
 
 const fs = require('fs');
 const AdmZip = require('adm-zip');
-const Buffer = global.Buffer;
 
 
 /**
@@ -402,7 +401,6 @@ inherits(App, BaseComponent);
 
 module.exports = App;
 
-
 App.prototype.render = function() {
 
   var html =
@@ -576,7 +574,7 @@ App.prototype.openWar = function() {
       return debug('open-war canceled: no file');
     }
     let newFiles = [];
-    files.forEach(function (item) {
+    files.forEach(function(item) {
       let zip = new AdmZip(item.path);
       let zipEntries = zip.getEntries();
       zipEntries.forEach(function(zipEntry) {
@@ -589,7 +587,7 @@ App.prototype.openWar = function() {
           });
         }
       });
-    })
+    });
 
     this.openFiles(newFiles);
   });

@@ -24,6 +24,7 @@ module.exports = function(karma) {
     ],
 
     preprocessors: {
+      'client/**/*.js': ['babel'],
       'test/**/*spec.js': [ 'browserify' ]
     },
 
@@ -39,6 +40,8 @@ module.exports = function(karma) {
     // browserify configuration
     browserify: {
       debug: true,
+      transform: [ 'babelify' ],
+      extensions: ['.js'],
       paths: [ absoluteLibPath, absoluteBasePath ]
     }
   });
