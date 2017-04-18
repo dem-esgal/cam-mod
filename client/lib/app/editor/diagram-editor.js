@@ -1,12 +1,9 @@
-'use strict';
-
 const inherits = require('inherits'),
       debounce = require('lodash/function/debounce'),
       BaseEditor = require('./base-editor'),
       debug = require('debug')('diagram-editor'),
       needsOverride = require('util/needs-override'),
       getWarnings = require('app/util/get-warnings');
-
 
 /**
  * Base diagram editor.
@@ -18,10 +15,10 @@ function DiagramEditor(options) {
   BaseEditor.call(this, options);
 
   this.on('imported', (context) => {
-    let xml = context.xml,
-        warnings = context.warnings;
+    const xml = context.xml,
+          warnings = context.warnings;
 
-    let initialState = this.initialState;
+    const initialState = this.initialState;
 
     // we are back at start, unset reimport flag
     if (xml === initialState.xml) {
@@ -41,8 +38,8 @@ function DiagramEditor(options) {
   });
 
   this.on('updated', (context) => {
-    let modeler = this.modeler,
-        initialState = this.initialState;
+    const modeler = this.modeler,
+          initialState = this.initialState;
 
     // log stack index on first imported
     // update after loading
@@ -57,7 +54,7 @@ function DiagramEditor(options) {
   });
 
   this.on('layout:update', function(evt) {
-    let log = evt.log;
+    const log = evt.log;
 
     if (log && log.cleared) {
       this.hideWarnings();
@@ -87,9 +84,9 @@ DiagramEditor.prototype.update = function() {
     return;
   }
 
-  let modeler = this.getModeler(),
-      lastXML = this.lastXML,
-      newXML = this.newXML;
+  const modeler = this.getModeler(),
+        lastXML = this.lastXML,
+        newXML = this.newXML;
 
   // reimport in XML change
   if (!newXML || lastXML === newXML) {
@@ -108,7 +105,7 @@ DiagramEditor.prototype.update = function() {
 
   modeler.importXML(newXML, (err, warnings) => {
 
-    let importContext = this.lastImport = {
+    const importContext = this.lastImport = {
       error: err,
       warnings: warnings,
       xml: newXML
@@ -124,7 +121,7 @@ DiagramEditor.prototype.update = function() {
 
 
 DiagramEditor.prototype.destroy = function() {
-  let modeler = this.getModeler();
+  const modeler = this.getModeler();
 
   if (modeler.destroy) {
     modeler.destroy();
@@ -133,8 +130,8 @@ DiagramEditor.prototype.destroy = function() {
 
 // This allows an easier replacing of this method f.ex: DMN needs
 DiagramEditor.prototype.saveXML = function(done) {
-  let modeler = this.getModeler(),
-      commandStack = modeler.get('commandStack');
+  const modeler = this.getModeler(),
+        commandStack = modeler.get('commandStack');
 
   this._saveXML(modeler, commandStack._stackIdx, done);
 };
@@ -142,15 +139,15 @@ DiagramEditor.prototype.saveXML = function(done) {
 
 DiagramEditor.prototype._saveXML = function(modeler, commandStackIdx, done) {
 
-  let initialState = this.initialState;
+  const initialState = this.initialState;
 
   debug('[#saveXML] save');
 
   this.emit('save');
 
-  let savedCallback = (err, xml) => {
+  const savedCallback = (err, xml) => {
 
-    let saveContext = { error: err, xml: xml };
+    const saveContext = { error: err, xml: xml };
 
     debug('[#saveXML] saved', saveContext);
 
@@ -175,7 +172,7 @@ DiagramEditor.prototype._saveXML = function(modeler, commandStackIdx, done) {
 
 DiagramEditor.prototype.triggerAction = function(action, options) {
 
-  let modeler = this.getModeler();
+  const modeler = this.getModeler();
 
   if (action === 'undo') {
     return modeler.get('commandStack').undo();
@@ -206,13 +203,13 @@ DiagramEditor.prototype.resize = function() {
 
 DiagramEditor.prototype.showWarnings = function() {
 
-  let warnings = getWarnings(this.lastImport);
+  const warnings = getWarnings(this.lastImport);
 
   if (!warnings) {
     return;
   }
 
-  let messages = warnings.map(function(warning) {
+  const messages = warnings.map(function(warning) {
     return [ 'warning', '> ' + warning.message ];
   });
 
@@ -246,7 +243,7 @@ DiagramEditor.prototype.openLog = function() {
 
 
 function warningsStr(warnings) {
-  let count = warnings.length;
+  const count = warnings.length;
 
   return count + ' warning' + (count !== 1 ? 's' : '');
 }

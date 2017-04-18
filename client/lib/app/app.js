@@ -1,45 +1,37 @@
-'use strict';
+const merge = require('lodash/object/merge'),
+      bind = require('lodash/function/bind'),
+      assign = require('lodash/object/assign'),
+      find = require('lodash/collection/find'),
+      filter = require('lodash/collection/filter'),
+      map = require('lodash/collection/map'),
+      debounce = require('lodash/function/debounce'),
+      inherits = require('inherits');
 
-var merge = require('lodash/object/merge'),
-    bind = require('lodash/function/bind'),
-    assign = require('lodash/object/assign'),
-    find = require('lodash/collection/find'),
-    filter = require('lodash/collection/filter'),
-    map = require('lodash/collection/map'),
-    debounce = require('lodash/function/debounce');
+const BaseComponent = require('base/component'),
+      MenuBar = require('base/components/menu-bar'),
+      Tabbed = require('base/components/tabbed'),
+      ModalOverlay = require('base/components/modal-overlay'),
+      MultiButton = require('base/components/buttons/multi-button'),
+      ColorPickerButton = require('base/components/buttons/color-picker-button'),
+      Button = require('base/components/buttons/button'),
+      Separator = require('base/components/buttons/separator');
+const BpmnProvider = require('./tabs/bpmn/provider'),
+      DmnProvider = require('./tabs/dmn/provider'),
+      CmmnProvider = require('./tabs/cmmn/provider');
 
-var inherits = require('inherits');
+const EmptyTab = require('./tabs/empty-tab'),
+      Footer = require('./footer'),
+      ensureOpts = require('util/ensure-opts'),
+      series = require('util/async/series'),
+      isUnsaved = require('util/file/is-unsaved'),
+      parseFileType = require('./util/parse-file-type'),
+      namespace = require('./util/namespace'),
+      fileDrop = require('./util/dom/file-drop');
 
-var BaseComponent = require('base/component'),
-    MenuBar = require('base/components/menu-bar'),
-    Tabbed = require('base/components/tabbed'),
-    ModalOverlay = require('base/components/modal-overlay');
-
-var MultiButton = require('base/components/buttons/multi-button'),
-    ColorPickerButton = require('base/components/buttons/color-picker-button'),
-    Button = require('base/components/buttons/button'),
-    Separator = require('base/components/buttons/separator');
-
-var BpmnProvider = require('./tabs/bpmn/provider'),
-    DmnProvider = require('./tabs/dmn/provider'),
-    CmmnProvider = require('./tabs/cmmn/provider');
-
-var EmptyTab = require('./tabs/empty-tab');
-
-var Footer = require('./footer');
-
-var ensureOpts = require('util/ensure-opts'),
-    series = require('util/async/series'),
-    isUnsaved = require('util/file/is-unsaved'),
-    parseFileType = require('./util/parse-file-type'),
-    namespace = require('./util/namespace'),
-    fileDrop = require('./util/dom/file-drop');
-
-var debug = require('debug')('app');
+const debug = require('debug')('app');
 
 const fs = require('fs');
 const AdmZip = require('adm-zip');
-
 
 /**
  * The main application entry point
@@ -68,7 +60,7 @@ function App(options) {
     }
   };
 
-  var EXPORT_BUTTONS = {
+  const EXPORT_BUTTONS = {
     png: {
       id: 'png',
       action: this.compose('triggerAction', 'export-tab', { type: 'png' }),
@@ -164,7 +156,7 @@ function App(options) {
           id: 'export-as',
           group: 'modeler',
           disabled: true,
-          choices: map(EXPORT_BUTTONS, function(btn) {
+          choices: map(EXPORT_BUTTONS, (btn)=>{
             return btn;
           })
         })
@@ -287,8 +279,6 @@ function App(options) {
 
   this.events.on('tools:state-changed', (tab, newState) => {
 
-    var button;
-
     if (this.activeTab !== tab) {
       return debug('Warning: state updated on incative tab! This should never happen!');
     }
@@ -311,43 +301,38 @@ function App(options) {
     });
 
     // update export button state
-    button = find(this.menuEntries.modeler.buttons, { id: 'export-as' });
+    const exportAs = find(this.menuEntries.modeler.buttons, { id: 'export-as' });
 
-    button.choices = (newState['exportAs'] || []).map((type) => {
+    exportAs.choices = (newState['exportAs'] || []).map((type) => {
       return EXPORT_BUTTONS[type];
     });
 
-    if (button.choices.length) {
-      button.disabled = false;
-      button.choices[0] = assign({}, button.choices[0], { icon: 'icon-picture', primary: true });
+    if (exportAs.choices.length) {
+      exportAs.disabled = false;
+      exportAs.choices[0] = assign({}, exportAs.choices[0], { icon: 'icon-picture', primary: true });
     } else {
-      button.disabled = true;
-      button.choices[0] = { icon: 'icon-picture', primary: true, label: 'Export as Image' };
+      exportAs.disabled = true;
+      exportAs.choices[0] = { icon: 'icon-picture', primary: true, label: 'Export as Image' };
     }
 
     // save and saveAs buttons
     // should work all the time as long as the
     // tab provides a save action
     [ 'save', 'save-as' ].forEach((key) => {
-      var enabled = 'save' in newState;
-
+      const enabled = 'save' in newState;
       this.updateMenuEntry('modeler', key, !enabled);
     });
 
     // update set color button state
-    button = find(this.menuEntries.bpmn.buttons, { id: 'set-color' });
-    button.disabled = !newState.elementsSelected;
+    const setColor = find(this.menuEntries.bpmn.buttons, { id: 'set-color' });
+    setColor.disabled = !newState.elementsSelected;
 
     this.events.emit('changed');
   });
 
   this.events.on('log:toggle', (options) => {
 
-    var open = options && options.open;
-
-    if (typeof open === 'undefined') {
-      open = !(this.layout.log && this.layout.log.open);
-    }
+    const open = (options && options.open) || !(this.layout.log && this.layout.log.open);
 
     this.events.emit('layout:update', {
       log: {
@@ -403,13 +388,13 @@ module.exports = App;
 
 App.prototype.render = function() {
 
-  var html =
+  return (
     <div className="app" onDragover={ fileDrop(this.compose('openFiles')) }>
       <ModalOverlay
         isActive={ this._activeOverlay }
         content={ this._overlayContent }
-        events={ this.events } />
-      <MenuBar entries={ this.menuEntries } />
+        events={ this.events }/>
+      <MenuBar entries={ this.menuEntries }/>
       <Tabbed
         className="main"
         tabs={ this.tabs }
@@ -417,14 +402,13 @@ App.prototype.render = function() {
         onDragTab={ this.compose('shiftTab') }
         onSelect={ this.compose('selectTab') }
         onContextMenu={ this.compose('openTabContextMenu') }
-        onClose={ this.compose('closeTab') } />
+        onClose={ this.compose('closeTab') }/>
       <Footer
         layout={ this.layout }
         log={ this.logger }
-        events={ this.events } />
-    </div>;
-
-  return html;
+        events={ this.events }/>
+    </div>
+  );
 };
 
 App.prototype.openTabContextMenu = function(tab, evt) {
@@ -464,7 +448,7 @@ App.prototype.toggleOverlay = function(isOpened) {
  */
 App.prototype.createComponent = function(Component, options) {
 
-  var actualOptions = assign(options || {}, {
+  const actualOptions = assign(options || {}, {
     events: this.events,
     layout: this.layout,
     logger: this.logger,
@@ -483,13 +467,13 @@ App.prototype.createComponent = function(Component, options) {
  */
 App.prototype.openFiles = function(files) {
 
-  var dialog = this.dialog;
+  const dialog = this.dialog;
 
   series(files, (file, done) => {
-    var type = parseFileType(file);
+    const type = parseFileType(file);
 
     if (!type) {
-      dialog.unrecognizedFileError(file, function(err) {
+      dialog.unrecognizedFileError(file, (err)=>{
         debug('open-diagram canceled: unrecognized file type', file);
 
         return done(err);
@@ -538,13 +522,12 @@ App.prototype.openFiles = function(files) {
  */
 App.prototype.openDiagram = function() {
 
-  var dialog = this.dialog;
-
-  var cwd = getFilePath(this.activeTab);
+  const dialog = this.dialog,
+        cwd = getFilePath(this.activeTab);
 
   dialog.open(cwd, (err, files) => {
     if (err) {
-      return dialog.openError(err, function() {
+      return dialog.openError(err, ()=>{
         debug('open-diagram canceled: %s', err);
       });
     }
@@ -559,13 +542,13 @@ App.prototype.openDiagram = function() {
 
 App.prototype.openWar = function() {
 
-  var dialog = this.dialog;
-
-  var cwd = getFilePath(this.activeTab);
+  const dialog = this.dialog,
+        cwd = getFilePath(this.activeTab);
 
   dialog.open(cwd, (err, files) => {
+    const newFiles = [];
     if (err) {
-      return dialog.openError(err, function() {
+      return dialog.openError(err, ()=>{
         debug('open-war canceled: %s', err);
       });
     }
@@ -573,11 +556,11 @@ App.prototype.openWar = function() {
     if (!files) {
       return debug('open-war canceled: no file');
     }
-    let newFiles = [];
-    files.forEach(function(item) {
-      let zip = new AdmZip(item.path);
-      let zipEntries = zip.getEntries();
-      zipEntries.forEach(function(zipEntry) {
+    files.forEach((item)=>{
+      const zip = new AdmZip(item.path),
+            zipEntries = zip.getEntries();
+
+      zipEntries.forEach((zipEntry)=>{
         console.log(zipEntry.toString()); // outputs zip entries information
         if (zipEntry.name.endsWith('.bpmn')) {
           newFiles.push({
@@ -597,7 +580,7 @@ App.prototype.triggerAction = function(action, options) {
 
   debug('trigger-action', action, options);
 
-  var activeTab = this.activeTab;
+  const activeTab = this.activeTab;
 
   if (action === 'select-tab') {
     if (options === 'next') {
@@ -700,9 +683,8 @@ App.prototype.triggerAction = function(action, options) {
  * @return {Tab} created diagram tab
  */
 App.prototype.createDiagram = function(type, attrs) {
-  var tabProvider = this._findTabProvider(type);
-
-  var file = tabProvider.createNewFile(attrs);
+  const tabProvider = this._findTabProvider(type),
+        file = tabProvider.createNewFile(attrs);
 
   return this.openTab(file);
 };
@@ -729,7 +711,7 @@ App.prototype.openTabs = function(files) {
     return;
   }
 
-  var openedTabs = files.map((file) => {
+  const openedTabs = files.map((file) => {
 
     // make sure we do not double open tabs
     // for the same file
@@ -761,7 +743,7 @@ App.prototype.openTab = function(file) {
  * @param {FileDescriptor} file
  */
 App.prototype._createTab = function(file) {
-  var tabProvider = this._findTabProvider(file.fileType);
+  const tabProvider = this._findTabProvider(file.fileType);
 
   return this._addTab(tabProvider.createTab(file));
 };
@@ -774,7 +756,7 @@ App.prototype.saveAllTabs = function() {
 
   debug('saving all open tabs');
 
-  var activeTab = this.activeTab;
+  const activeTab = this.activeTab;
 
   series(this.tabs, (tab, done) => {
     if (!tab.save || !tab.dirty) {
@@ -782,7 +764,7 @@ App.prototype.saveAllTabs = function() {
       return done(null);
     }
 
-    this.saveTab(tab, function(err, savedFile) {
+    this.saveTab(tab, (err, savedFile)=>{
 
       if (err || !savedFile) {
         return done(err || userCanceled());
@@ -851,8 +833,8 @@ App.prototype.findTab = function(file) {
     return null;
   }
 
-  return find(this.tabs, function(t) {
-    var tabPath = (t.file ? t.file.path : null);
+  return find(this.tabs, (t)=>{
+    const tabPath = (t.file ? t.file.path : null);
     return file.path === tabPath;
   });
 };
@@ -867,7 +849,7 @@ App.prototype.findTab = function(file) {
  */
 App.prototype._findTabProvider = function(fileType) {
 
-  var tabProvider = find(this.tabProviders, function(provider) {
+  const tabProvider = find(this.tabProviders, (provider)=>{
     return provider.canCreate(fileType);
   });
 
@@ -891,7 +873,7 @@ App.prototype._findTabProvider = function(fileType) {
  * @param {Function} [done] invoked with (err, savedFile)
  */
 App.prototype.saveTab = function(tab, options, done) {
-  var dialog = this.dialog;
+  const dialog = this.dialog;
 
   if (!tab) {
     throw new Error('need tab to save');
@@ -904,13 +886,13 @@ App.prototype.saveTab = function(tab, options, done) {
 
   done = done || function(err) {
     if (err) {
-      dialog.saveError(err, function() {
+      dialog.saveError(err, ()=>{
         debug('error: %s', err);
       });
     }
   };
 
-  var updateTab = (err, savedFile) => {
+  const updateTab = (err, savedFile) => {
 
     if (err) {
       debug('not gonna update tab: %s', err);
@@ -936,7 +918,7 @@ App.prototype.saveTab = function(tab, options, done) {
   debug('saving %s', tab.id);
 
   // keep track of current active tab
-  var activeTab = this.activeTab;
+  const activeTab = this.activeTab;
 
   // making sure tab is selected before save
   this.selectTab(tab);
@@ -951,7 +933,7 @@ App.prototype.saveTab = function(tab, options, done) {
 
     debug('exported %s \n%s', tab.id, file.contents);
 
-    var saveAs = isUnsaved(file) || options && options.saveAs;
+    const saveAs = isUnsaved(file) || options && options.saveAs;
 
     this.saveFile(file, saveAs, updateTab);
   });
@@ -966,14 +948,14 @@ App.prototype.saveTab = function(tab, options, done) {
  * @param {Function} done
  */
 App.prototype.saveFile = function(file, saveAs, done) {
-  var self = this;
+  const self = this;
 
-  var dialog = this.dialog,
-      fileSystem = this.fileSystem;
+  const dialog = this.dialog,
+        fileSystem = this.fileSystem;
 
   function handleFileError(err, savedFile) {
     if (err) {
-      return dialog.savingDenied(function(err, choice) {
+      return dialog.savingDenied((err, choice)=>{
         if (err) {
           debug('save file canceled: %s', err);
 
@@ -1026,7 +1008,7 @@ App.prototype.saveFile = function(file, saveAs, done) {
 App.prototype.selectTab = function(tab) {
   debug('selecting tab');
 
-  var exists = contains(this.tabs, tab);
+  const exists = contains(this.tabs, tab);
 
   if (tab && !exists) {
     throw new Error('non existing tab');
@@ -1054,7 +1036,7 @@ App.prototype.selectTab = function(tab) {
  * @param  {Boolean} isNext
  */
 App.prototype._selectWithDirection = function(isNext) {
-  var nonEmptyTabs = filter(this.tabs, function(t) {
+  const nonEmptyTabs = filter(this.tabs, (t)=>{
     return !t.empty;
   });
 
@@ -1081,14 +1063,12 @@ App.prototype.selectNext = function() {
   this._selectWithDirection(true);
 };
 
-
 /**
  * Select previus non-empty tab
  */
 App.prototype.selectPrevious = function() {
   this._selectWithDirection(false);
 };
-
 
 /**
  * Close the given tab. If the user aborts the operation
@@ -1102,8 +1082,9 @@ App.prototype.closeTab = function(tab, done) {
 
   debug('close tab', tab);
 
+  const dialog = this.dialog;
+
   var tabs = this.tabs,
-      dialog = this.dialog,
       exists,
       file;
 
@@ -1118,7 +1099,7 @@ App.prototype.closeTab = function(tab, done) {
   }
 
   if (typeof done !== 'function') {
-    done = function(err) {
+    done = (err)=>{
       if (err) {
         debug('error: %s', err);
       }
@@ -1178,14 +1159,14 @@ App.prototype.closeTab = function(tab, done) {
  * @param  {Function} done
  */
 App.prototype._closeTab = function(tab, done) {
-  var tabs = this.tabs,
-      events = this.events;
+  const tabs = this.tabs,
+        events = this.events;
 
   tab.emit('destroy');
 
   events.emit('tab:close', tab);
 
-  var idx = tabs.indexOf(tab);
+  const idx = tabs.indexOf(tab);
 
   // remove tab from selection
   tabs.splice(idx, 1);
@@ -1215,8 +1196,8 @@ App.prototype._closeTab = function(tab, done) {
  */
 App.prototype._addTab = function(tab) {
 
-  var tabs = this.tabs,
-      events = this.events;
+  const tabs = this.tabs,
+        events = this.events;
 
   // always add tab right before the EMPTY_TAB
   // TODO(vlad): make adding before empty tab more explicit
@@ -1236,7 +1217,7 @@ App.prototype._addTab = function(tab) {
  */
 App.prototype.persistWorkspace = function(done) {
 
-  var config = {
+  const config = {
     tabs: [],
     activeTab: -1
   };
@@ -1244,7 +1225,7 @@ App.prototype.persistWorkspace = function(done) {
   // store tabs
   this.tabs.forEach((tab, idx) => {
 
-    var file = tab.file;
+    const file = tab.file;
 
     // do not persist unsaved files
     if (isUnsaved(file)) {
@@ -1281,7 +1262,7 @@ App.prototype.persistWorkspace = function(done) {
  */
 App.prototype.restoreWorkspace = function(done) {
 
-  var defaultWorkspace = {
+  const defaultWorkspace = {
     tabs: [],
     layout: {
       propertiesPanel: {
@@ -1332,7 +1313,7 @@ App.prototype.restoreWorkspace = function(done) {
  * @param  {Boolean} isDisabled
  */
 App.prototype.updateMenuEntry = function(group, id, isDisabled) {
-  var button = find(this.menuEntries[group].buttons, { id: id });
+  const button = find(this.menuEntries[group].buttons, { id: id });
 
   button.disabled = isDisabled;
 
@@ -1375,14 +1356,13 @@ App.prototype.run = function() {
  * @param  {Number} newIdx
  */
 App.prototype.shiftTab = function(tab, newIdx) {
-  var tabs = this.tabs,
-      tabIdx;
+  const tabs = this.tabs;
 
   if (!tab) {
     return;
   }
 
-  tabIdx = tabs.indexOf(tab);
+  const tabIdx = tabs.indexOf(tab);
 
   tabs.splice(tabIdx, 1);
 
@@ -1421,7 +1401,7 @@ App.prototype._closeTabs = function(tabs, cb) {
  * Closes all tabs that have external files associated with them.
  */
 App.prototype.closeAllTabs = function() {
-  var tabs = this.tabs.filter(function(tab) {
+  const tabs = this.tabs.filter((tab)=>{
     return !!tab.file;
   });
 
@@ -1439,9 +1419,9 @@ App.prototype.closeOtherTabs = function(tab) {
     tab = contains(this.tabs, tab) ? tab : null;
   }
 
-  var openedTab = tab || this.activeTab;
+  const openedTab = tab || this.activeTab;
 
-  var tabs = this.tabs.filter(function(tab) {
+  const tabs = this.tabs.filter((tab)=>{
     return tab.closable && openedTab !== tab;
   });
 
@@ -1450,7 +1430,7 @@ App.prototype.closeOtherTabs = function(tab) {
 
 
 App.prototype.reopenLastTab = function() {
-  var file = this.fileHistory.pop();
+  const file = this.fileHistory.pop();
 
   if (file) {
     this.openFiles([ file ]);
@@ -1464,7 +1444,7 @@ App.prototype.reopenLastTab = function() {
 App.prototype.quit = function() {
   debug('initiating application quit');
 
-  var dirtyTabs = this.tabs.filter(function(tab) {
+  const dirtyTabs = this.tabs.filter((tab)=>{
     return tab.dirty;
   });
 
@@ -1484,7 +1464,7 @@ App.prototype.quit = function() {
   });
 };
 
-var rdebug = require('debug')('app - external change');
+const rdebug = require('debug')('app - external change');
 
 /**
  * Checks tab content for external changes
@@ -1502,7 +1482,7 @@ App.prototype.recheckTabContent = function(tab) {
     return rdebug('skipping (missing tab.file.lastChanged)');
   }
 
-  var setNewFile = (file) => {
+  const setNewFile = (file) => {
     tab.setFile(assign({}, tab.file, file));
 
     this.events.emit('workspace:changed');
@@ -1529,7 +1509,7 @@ App.prototype.recheckTabContent = function(tab) {
       if (isOk(answer)) {
         rdebug('reloading');
 
-        this.fileSystem.readFile(tab.file, function(err, updatedFile) {
+        this.fileSystem.readFile(tab.file, (err, updatedFile)=>{
           if (err) {
             return rdebug('reloading failed', err);
           }
@@ -1550,7 +1530,7 @@ App.prototype.recheckTabContent = function(tab) {
 
 
 function contains(collection, element) {
-  return collection.some(function(e) {
+  return collection.some((e)=>{
     return e === element;
   });
 }

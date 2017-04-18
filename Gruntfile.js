@@ -9,7 +9,7 @@ module.exports = function(grunt) {
 
   // configures browsers to run test against
   // any of [ 'PhantomJS', 'Chrome', 'Firefox', 'IE']
-  var TEST_BROWSERS = ((process.env.TEST_BROWSERS || '').replace(/^\s+|\s+$/, '') || 'PhantomJS').split(/\s*,\s*/g);
+  var TEST_BROWSERS = ((process.env.TEST_BROWSERS || '').replace(/^\s+|\s+$/, '') || 'Electron').split(/\s*,\s*/g);
 
   // project configuration
   grunt.initConfig({
@@ -88,6 +88,16 @@ module.exports = function(grunt) {
             flatten: true
           }
         ]
+      },
+      images: {
+        files: [
+          {
+            src: 'client/styles/images/*',
+            dest: 'public/css/images/',
+            expand: true,
+            flatten: true
+          }
+        ]
       }
     },
 
@@ -145,7 +155,11 @@ module.exports = function(grunt) {
         tasks: [ 'less' ]
       },
       copy: {
-        files: 'client/lib/index.html',
+        files: ['client/lib/index.html',
+          'client/fonts/{app,bpmn,dmn}.*',
+          'node_modules/cmmn-js/assets/cmmn-font/font/cmmn.*',
+          'client/styles/images/*'
+        ],
         tasks: [ 'copy' ]
       },
       client: {

@@ -1,6 +1,6 @@
 @import "bpmn-js-properties-panel/styles/properties";
 @import (less) "diagram-js/assets/diagram-js.css";
-
+@main-bg-color: #fcfcff;
 
 .bpmn-editor {
   .flex-container(row);
@@ -32,14 +32,14 @@
     position: relative;
     outline: none;
 
-    background: #f8f8f8;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    background: @main-bg-color;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 
     .toggle {
       position: absolute;
       left: -29px;
       top: 40%;
-      background: #f8f8f8;
+      background: @main-bg-color;
       padding: 7px 10px;
       transform: rotate(-90deg);
       white-space: nowrap;
@@ -70,7 +70,7 @@
       flex: 1;
       position: relative;
 
-      border-left: solid 1px #CCC;
+      border-left: solid 1px #dce6dc;
     }
 
     .properties-parent {

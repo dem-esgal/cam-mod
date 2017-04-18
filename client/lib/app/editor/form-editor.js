@@ -1,12 +1,17 @@
-'use strict';
+const inherits = require('inherits'),
+      BaseEditor = require('./base-editor'),
+      debug = require('debug')('xml-editor'),
+      path = require('path');
 
-let inherits = require('inherits');
-let BaseEditor = require('./base-editor');
-let debug = require('debug')('xml-editor');
-const app = require('electron').remote.app;
-const path = require('path');
-const basepath = app.getAppPath();
-const webviewUrl = 'file://' + path.resolve(basepath + '/../fb/index.html');
+let electron;
+try {
+  electron = require('electron');
+} catch (e) {
+  electron = { remote:{ app:{ getAppPath:function() {return ''; } } } };
+}
+const app = electron.remote.app,
+      basepath = app.getAppPath(),
+      webviewUrl = 'file://' + path.resolve(basepath + '/../fb/index.html');
 
 function FormEditor(options) {
 
@@ -71,7 +76,7 @@ FormEditor.prototype.update = function() {
     return;
   }
 
-  var newXML = this.newXML;
+  const newXML = this.newXML;
   this.emit('imported', newXML);
   this.lastXML = newXML;
   this.emit('updated', {});

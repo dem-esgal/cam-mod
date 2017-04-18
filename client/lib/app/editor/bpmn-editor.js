@@ -1,10 +1,8 @@
-'use strict';
-
-const inherits = require('inherits');
-const assign = require('lodash/object/assign');
-const domify = require('domify');
-const DiagramEditor = require('./diagram-editor');
-const BpmnJS = require('bpmn-js/lib/Modeler');
+const inherits = require('inherits'),
+      assign = require('lodash/object/assign'),
+      domify = require('domify'),
+      DiagramEditor = require('./diagram-editor'),
+      BpmnJS = require('bpmn-js/lib/Modeler');
 
 const diagramOriginModule = require('diagram-js-origin'),
       executableFixModule = require('./bpmn/executable-fix'),
@@ -29,7 +27,7 @@ const generateWar = require('app/util/generate-war');
 
 const debug = require('debug')('bpmn-editor');
 
-
+const __ = require('./../../../locales/').__;
 /**
  * A BPMN 2.0 diagram editing component.
  *
@@ -61,7 +59,7 @@ function BpmnEditor(options) {
 
   // set current modeler version and name to the diagram
   this.on('save', () => {
-    let definitions = this.getModeler().definitions;
+    const definitions = this.getModeler().definitions;
 
     if (definitions) {
       definitions.exporter = options.metaData.name;
@@ -74,9 +72,8 @@ inherits(BpmnEditor, DiagramEditor);
 
 module.exports = BpmnEditor;
 
-
-BpmnEditor.prototype.triggerEditorActions = function(action, options = {}) {
-  let opts = options,
+BpmnEditor.prototype.triggerEditorActions = function(action, options) {
+  var opts = options || {},
       modeler = this.getModeler(),
       editorActions = modeler.get('editorActions', false);
 
@@ -153,7 +150,7 @@ BpmnEditor.prototype.triggerEditorActions = function(action, options = {}) {
 
 BpmnEditor.prototype.updateState = function() {
 
-  let modeler = this.getModeler(),
+  var modeler = this.getModeler(),
       initialState = this.initialState,
       commandStack,
       inputActive;
@@ -163,11 +160,11 @@ BpmnEditor.prototype.updateState = function() {
     return;
   }
 
-  let elementsSelected,
+  var elementsSelected,
       elements,
       dirty;
 
-  let stateContext = {
+  var stateContext = {
     bpmn: true,
     undo: !!initialState.undo,
     redo: !!initialState.redo,
@@ -333,9 +330,9 @@ BpmnEditor.prototype.createModeler = function($el, $propertiesEl) {
 };
 
 BpmnEditor.prototype.exportAs = function(type, done) {
-  let modeler = this.getModeler();
+  const modeler = this.getModeler();
   if (type == 'war') {
-    let file = {};
+    const file = {};
     try {
       this.saveXML((err, xml) => {
         if (err) {
@@ -349,7 +346,7 @@ BpmnEditor.prototype.exportAs = function(type, done) {
     return done(null, file);
   }
   modeler.saveSVG((err, svg) => {
-    let file = {};
+    const file = {};
 
     if (err) {
       return done(err);
@@ -371,21 +368,21 @@ BpmnEditor.prototype.exportAs = function(type, done) {
 
 // trigger the palette resizal whenever we focus a tab or the layout is updated
 BpmnEditor.prototype.resize = function() {
-  let modeler = this.getModeler(),
-      canvas = modeler.get('canvas');
+  const modeler = this.getModeler(),
+        canvas = modeler.get('canvas');
 
   canvas.resized();
 };
 
 BpmnEditor.prototype.render = function() {
 
-  let propertiesLayout = this.layout.propertiesPanel;
+  const propertiesLayout = this.layout.propertiesPanel;
 
-  let propertiesStyle = {
+  const propertiesStyle = {
     width: (propertiesLayout.open ? propertiesLayout.width : 0) + 'px'
   };
 
-  let warnings = getWarnings(this.lastImport);
+  const warnings = getWarnings(this.lastImport);
 
   return (
     <div className="bpmn-editor"
@@ -402,7 +399,7 @@ BpmnEditor.prototype.render = function() {
              draggable="true"
              onClick={ this.compose('toggleProperties') }
              onDragstart={ dragger(this.compose('resizeProperties', copy(propertiesLayout))) }>
-          Properties Panel
+          {__('Properties Panel')}
         </div>
         <div className="resize-handle"
              draggable="true"
@@ -421,7 +418,7 @@ BpmnEditor.prototype.render = function() {
 
 BpmnEditor.prototype.logTemplateWarnings = function(warnings) {
 
-  let messages = warnings.map(function(warning) {
+  const messages = warnings.map(function(warning) {
     return [ 'warning', '> ' + warning.message ];
   });
 
@@ -440,7 +437,7 @@ BpmnEditor.prototype.logTemplateWarnings = function(warnings) {
  */
 BpmnEditor.prototype.notifyModeler = function(eventName) {
 
-  let modeler = this.getModeler();
+  const modeler = this.getModeler();
 
   try {
     modeler.get('eventBus').fire(eventName);

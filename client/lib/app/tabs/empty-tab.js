@@ -1,12 +1,8 @@
-'use strict';
-
-var inherits = require('inherits');
-
-var assign = require('lodash/object/assign');
-
-var Tab = require('base/components/tab');
-
-var ensureOpts = require('util/ensure-opts');
+const inherits = require('inherits'),
+      assign = require('lodash/object/assign'),
+      Tab = require('base/components/tab'),
+      ensureOpts = require('util/ensure-opts'),
+      __ = require('./../../../locales').__;
 
 function EmptyTab(options) {
 
@@ -21,17 +17,17 @@ function EmptyTab(options) {
     'events'
   ], options);
 
-  this.render = function() {
+  this.render = ()=>{
 
-    var html =
+    const html =
       <div className="empty-tab">
         <p className="buttons-create">
-          <span>Create a </span>
-          <button onClick={ this.app.compose('triggerAction', 'create-bpmn-diagram') }>BPMN diagram</button>
-          <span> or </span>
-          <button onClick={ this.app.compose('triggerAction', 'create-dmn-diagram') }>DMN diagram</button>
-          <span> or </span>
-          <button onClick={ this.app.compose('triggerAction', 'create-cmmn-diagram') }>CMMN diagram</button>
+          <span>{__('Create a')}</span>
+          <button onClick={ this.app.compose('triggerAction', 'create-bpmn-diagram') }>BPMN {__('diagram_create')}</button>
+          <span>{__('or')}</span>
+          <button onClick={ this.app.compose('triggerAction', 'create-dmn-diagram') }>DMN {__('diagram_create')}</button>
+          <span>{__('or')}</span>
+          <button onClick={ this.app.compose('triggerAction', 'create-cmmn-diagram') }>CMMN {__('diagram_create')}</button>
         </p>
       </div>;
 

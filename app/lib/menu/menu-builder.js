@@ -1,14 +1,11 @@
-'use strict';
-
-var electron = require('electron'),
-    Menu = electron.Menu,
-    MenuItem = electron.MenuItem,
-    app = electron.app;
-
-var browserOpen = require('../util/browser-open');
-
-var merge = require('lodash/object/merge'),
-    assign = require('lodash/object/assign');
+const electron = require('electron'),
+      Menu = electron.Menu,
+      MenuItem = electron.MenuItem,
+      app = electron.app,
+      browserOpen = require('../util/browser-open'),
+      merge = require('lodash/object/merge'),
+      assign = require('lodash/object/assign'),
+      __ = require('./../locales/').__;
 
 
 function MenuBuilder(opts) {
@@ -52,7 +49,7 @@ MenuBuilder.prototype.appendAppMenu = function() {
 
 MenuBuilder.prototype.appendFileMenu = function(submenu) {
   this.menu.append(new MenuItem({
-    label: 'File',
+    label: __('File'),
     submenu: submenu
   }));
 
@@ -61,25 +58,25 @@ MenuBuilder.prototype.appendFileMenu = function(submenu) {
 
 MenuBuilder.prototype.appendNewFile = function() {
   this.menu.append(new MenuItem({
-    label: 'New File',
+    label: __('New File'),
     submenu: Menu.buildFromTemplate([{
-      label: 'BPMN Diagram',
+      label: 'BPMN ' + __('Diagram'),
       accelerator: 'CommandOrControl+T',
       click: function() {
         app.emit('menu:action', 'create-bpmn-diagram');
       }
     }, {
-      label: 'DMN Table',
+      label: 'DMN ' + __('Table'),
       click: function() {
         app.emit('menu:action', 'create-dmn-table');
       }
     }, {
-      label: 'DMN Diagram',
+      label: 'DMN ' + __('Diagram'),
       click: function() {
         app.emit('menu:action', 'create-dmn-diagram');
       }
     }, {
-      label: 'CMMN Diagram',
+      label: 'CMMN '+__('Diagram'),
       click: function() {
         app.emit('menu:action', 'create-cmmn-diagram');
       }
@@ -91,14 +88,14 @@ MenuBuilder.prototype.appendNewFile = function() {
 
 MenuBuilder.prototype.appendOpen = function() {
   this.menu.append(new MenuItem({
-    label: 'Open File...',
+    label: __('Open_File'),
     accelerator: 'CommandOrControl+O',
     click: function() {
       app.emit('menu:action', 'open-diagram');
     }
   }));
   this.menu.append(new MenuItem({
-    label: 'Open War File...',
+    label: __('OPEN_WAR_FILE'),
     accelerator: 'CommandOrControl+W',
     click: function() {
       app.emit('menu:action', 'open-war');
@@ -111,9 +108,9 @@ MenuBuilder.prototype.appendOpen = function() {
 
 MenuBuilder.prototype.appendReopenLastTab = function() {
   this.menu.append(new MenuItem({
-    label: 'Reopen Last File',
+    label: __('Reopen Last File'),
     accelerator: 'CommandOrControl+Shift+T',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'reopen-last-tab');
     }
   }));
@@ -123,10 +120,10 @@ MenuBuilder.prototype.appendReopenLastTab = function() {
 
 MenuBuilder.prototype.appendSaveFile = function() {
   this.menu.append(new MenuItem({
-    label: 'Save File',
+    label: __('Save File'),
     enabled: this.opts.state.save,
     accelerator: 'CommandOrControl+S',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'save');
     }
   }));
@@ -136,10 +133,10 @@ MenuBuilder.prototype.appendSaveFile = function() {
 
 MenuBuilder.prototype.appendSaveAsFile = function() {
   this.menu.append(new MenuItem({
-    label: 'Save File As..',
+    label: __('SAVE_FILE_AS'),
     accelerator: 'CommandOrControl+Shift+S',
     enabled: this.opts.state.save,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'save-as');
     }
   }));
@@ -149,10 +146,10 @@ MenuBuilder.prototype.appendSaveAsFile = function() {
 
 MenuBuilder.prototype.appendSaveAllFiles = function() {
   this.menu.append(new MenuItem({
-    label: 'Save All Files',
+    label: __('Save All Files'),
     accelerator: 'CommandOrControl+Alt+S',
     enabled: this.opts.state.save,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'save-all');
     }
   }));
@@ -161,39 +158,39 @@ MenuBuilder.prototype.appendSaveAllFiles = function() {
 };
 
 MenuBuilder.prototype.appendExportAs = function(submenu) {
-  var exportState = this.opts.state.exportAs;
+  const exportState = this.opts.state.exportAs;
 
   function canExport(type) {
     return (exportState || []).indexOf(type) !== -1;
   }
 
   this.menu.append(new MenuItem({
-    label: 'Export As..',
+    label: __('EXPORT_AS'),
     submenu: submenu || Menu.buildFromTemplate([{
       label: 'PNG Image',
       enabled: canExport('png'),
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'export-tab', { type: 'png' });
       }
     },
     {
-      label: 'JPEG Image',
+      label: 'JPEG ' + __('Image'),
       enabled: canExport('jpeg'),
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'export-tab', { type: 'jpeg' });
       }
     },
     {
-      label: 'SVG Image',
+      label: 'SVG ' + __('Image'),
       enabled: canExport('svg'),
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'export-tab', { type: 'svg' });
       }
     },
     {
       label: 'War',
       enabled: canExport('war'),
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'export-tab', { type: 'war' });
       }
     }
@@ -207,26 +204,26 @@ MenuBuilder.prototype.appendExportAs = function(submenu) {
 
 MenuBuilder.prototype.appendCloseTab = function() {
   this.menu.append(new MenuItem({
-    label: 'Close Tab',
+    label: __('Close Tab'),
     enabled: this.opts.state.closable,
     accelerator: 'CommandOrControl+W',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'close-active-tab');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Close All Tabs',
+    label: __('Close All Tabs'),
     enabled: this.opts.state.closable,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'close-all-tabs');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Close Other Tabs',
+    label: __('Close Other Tabs'),
     enabled: this.opts.state.closable,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'close-other-tabs');
     }
   }));
@@ -237,20 +234,20 @@ MenuBuilder.prototype.appendCloseTab = function() {
 // todo(ricardo): add a proper state check for switching tabs
 MenuBuilder.prototype.appendSwitchTab = function(submenu) {
   this.menu.append(new MenuItem({
-    label: 'Switch Tab..',
+    label: __('SWITCH_TAB'),
     submenu: submenu || Menu.buildFromTemplate([{
-      label: 'Select Next Tab',
+      label: __('Select Next Tab'),
       enabled: this.opts.state.closable,
       accelerator: 'Control+TAB',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'select-tab', 'next');
       }
     },
     {
-      label: 'Select Previous Tab',
+      label: __('Select Previous Tab'),
       enabled: this.opts.state.closable,
       accelerator: 'Control+SHIFT+TAB',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'select-tab', 'previous');
       }
     }])
@@ -263,9 +260,9 @@ MenuBuilder.prototype.appendSwitchTab = function(submenu) {
 
 MenuBuilder.prototype.appendQuit = function(submenu) {
   this.menu.append(new MenuItem({
-    label: 'Quit',
+    label: __('Quit'),
     accelerator: 'CommandOrControl+Q',
-    click: function() {
+    click: ()=>{
       app.emit('app:quit');
     }
   }));
@@ -275,10 +272,10 @@ MenuBuilder.prototype.appendQuit = function(submenu) {
 
 MenuBuilder.prototype.appendRedo = function() {
   this.menu.append(new MenuItem({
-    label: 'Redo',
+    label: __('Redo'),
     enabled: this.opts.state.redo,
     accelerator: 'CommandOrControl+Y',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'redo');
     }
   }));
@@ -286,27 +283,27 @@ MenuBuilder.prototype.appendRedo = function() {
 
 MenuBuilder.prototype.appendCopyPaste = function() {
 
-  var copyEntry = {
-    label: 'Copy',
+  const copyEntry = {
+    label: __('Copy'),
     enabled: !this.opts.state.inactiveInput || (this.opts.state.elementsSelected && this.opts.state.copy),
     accelerator: 'CommandOrControl+C',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'copy');
     }
   };
 
-  var pasteEntry = {
-    label: 'Paste',
+  const pasteEntry = {
+    label: __('Paste'),
     enabled: !this.opts.state.inactiveInput || this.opts.state.paste,
     accelerator: 'CommandOrControl+V',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'paste');
     }
   };
 
   if (!this.opts.state.inactiveInput) {
     this.menu.append(new MenuItem({
-      label: 'Cut',
+      label: __('Cut'),
       accelerator: 'CommandOrControl+X',
       role: 'cut'
     }));
@@ -324,10 +321,10 @@ MenuBuilder.prototype.appendCopyPaste = function() {
 
 MenuBuilder.prototype.appendBaseEditActions = function() {
   this.menu.append(new MenuItem({
-    label: 'Undo',
+    label: __('Undo'),
     enabled: this.opts.state.undo,
     accelerator: 'CommandOrControl+Z',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'undo');
     }
   }));
@@ -343,46 +340,46 @@ MenuBuilder.prototype.appendBaseEditActions = function() {
 
 MenuBuilder.prototype.appendBpmnActions = function() {
   this.menu.append(new MenuItem({
-    label: 'Hand Tool',
+    label: __('Hand Tool'),
     accelerator: 'H',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'handTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Lasso Tool',
+    label: __('Lasso Tool'),
     accelerator: 'L',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'lassoTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Space Tool',
+    label: __('Space Tool'),
     accelerator: 'S',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'spaceTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Global Connect Tool',
+    label: __('Global Connect Tool'),
     accelerator: 'C',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'globalConnectTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Edit Label',
+    label: __('Edit Label'),
     accelerator: 'E',
     enabled: this.opts.state.elementsSelected,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'directEditing');
     }
   }));
@@ -390,47 +387,47 @@ MenuBuilder.prototype.appendBpmnActions = function() {
   this.appendSeparator();
 
   this.menu.append(new MenuItem({
-    label: 'Align Elements',
+    label: __('Align Elements'),
     enabled: this.opts.state.elementsSelected,
     submenu: Menu.buildFromTemplate([
       {
-        label: 'Align Left',
-        click: function() {
+        label: __('Align Left'),
+        click: ()=>{
           app.emit('menu:action', 'alignElements', {
             type: 'left'
           });
         }
       }, {
-        label: 'Align Right',
-        click: function() {
+        label: __('Align Right'),
+        click: ()=>{
           app.emit('menu:action', 'alignElements', {
             type: 'right'
           });
         }
       }, {
-        label: 'Align Center',
-        click: function() {
+        label: __('Align Center'),
+        click: ()=>{
           app.emit('menu:action', 'alignElements', {
             type: 'center'
           });
         }
       }, {
-        label: 'Align Top',
-        click: function() {
+        label: __('Align Top'),
+        click: ()=>{
           app.emit('menu:action', 'alignElements', {
             type: 'top'
           });
         }
       }, {
-        label: 'Align Bottom',
-        click: function() {
+        label: __('Align Bottom'),
+        click: ()=>{
           app.emit('menu:action', 'alignElements', {
             type: 'bottom'
           });
         }
       }, {
-        label: 'Align Middle',
-        click: function() {
+        label: __('Align Middle'),
+        click: ()=>{
           app.emit('menu:action', 'alignElements', {
             type: 'middle'
           });
@@ -440,20 +437,20 @@ MenuBuilder.prototype.appendBpmnActions = function() {
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Distribute Elements',
+    label: __('Distribute Elements'),
     enabled: this.opts.state.elementsSelected,
     submenu: Menu.buildFromTemplate([
       {
-        label: 'Distribute Horizontally',
+        label: __('Distribute Horizontally'),
         enabled: this.opts.state.elementsSelected,
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'distributeHorizontally');
         }
       },
       {
-        label: 'Distribute Vertically',
+        label: __('Distribute Vertically'),
         enabled: this.opts.state.elementsSelected,
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'distributeVertically');
         }
       }
@@ -463,9 +460,9 @@ MenuBuilder.prototype.appendBpmnActions = function() {
   this.appendSeparator();
 
   this.menu.append(new MenuItem({
-    label: 'Find',
+    label: __('Find'),
     accelerator: 'CommandOrControl + F',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'find');
     }
   }));
@@ -473,43 +470,43 @@ MenuBuilder.prototype.appendBpmnActions = function() {
   this.appendSeparator();
 
   this.menu.append(new MenuItem({
-    label: 'Move Elements to Origin',
+    label: __('Move Elements to Origin'),
     accelerator: 'CommandOrControl+Shift+0',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'moveToOrigin');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Move Canvas',
+    label: __('Move Canvas'),
     submenu: Menu.buildFromTemplate([{
       label: 'Move Up',
       accelerator: 'Up',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'up'
         });
       }
     }, {
-      label: 'Move Left',
+      label: __('Move Left'),
       accelerator: 'Left',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'left'
         });
       }
     }, {
-      label: 'Move Down',
+      label: __('Move Down'),
       accelerator: 'Down',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'down'
         });
       }
     }, {
-      label: 'Move Right',
+      label: __('Move Right'),
       accelerator: 'Right',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'right'
         });
@@ -518,9 +515,9 @@ MenuBuilder.prototype.appendBpmnActions = function() {
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Select All',
+    label: __('Select All'),
     accelerator: 'CommandOrControl+A',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'selectElements');
     }
   }));
@@ -533,46 +530,46 @@ MenuBuilder.prototype.appendBpmnActions = function() {
 
 MenuBuilder.prototype.appendCmmnActions = function() {
   this.menu.append(new MenuItem({
-    label: 'Hand Tool',
+    label: __('Hand Tool'),
     accelerator: 'H',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'handTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Lasso Tool',
+    label: __('Lasso Tool'),
     accelerator: 'L',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'lassoTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Space Tool',
+    label: __('Space Tool'),
     accelerator: 'S',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'spaceTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Global Connect Tool',
+    label: __('Global Connect Tool'),
     accelerator: 'C',
     enabled: this.opts.state.inactiveInput,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'globalConnectTool');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Edit Label',
+    label: __('Edit Label'),
     accelerator: 'E',
     enabled: this.opts.state.elementsSelected,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'directEditing');
     }
   }));
@@ -580,9 +577,9 @@ MenuBuilder.prototype.appendCmmnActions = function() {
   this.appendSeparator();
 
   this.menu.append(new MenuItem({
-    label: 'Find',
+    label: __('Find'),
     accelerator: 'CommandOrControl + F',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'find');
     }
   }));
@@ -590,35 +587,35 @@ MenuBuilder.prototype.appendCmmnActions = function() {
   this.appendSeparator();
 
   this.menu.append(new MenuItem({
-    label: 'Move Canvas',
+    label: __('Move Canvas'),
     submenu: Menu.buildFromTemplate([{
-      label: 'Move Up',
+      label: __('Move Up'),
       accelerator: 'Up',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'up'
         });
       }
     }, {
-      label: 'Move Left',
+      label: __('Move Left'),
       accelerator: 'Left',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'left'
         });
       }
     }, {
-      label: 'Move Down',
+      label: __('Move Down'),
       accelerator: 'Down',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'down'
         });
       }
     }, {
-      label: 'Move Right',
+      label: __('Move Right'),
       accelerator: 'Right',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'moveCanvas', {
           direction: 'right'
         });
@@ -627,9 +624,9 @@ MenuBuilder.prototype.appendCmmnActions = function() {
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Select All',
+    label: __('Select All'),
     accelerator: 'CommandOrControl+A',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'selectElements');
     }
   }));
@@ -641,10 +638,10 @@ MenuBuilder.prototype.appendCmmnActions = function() {
 
 MenuBuilder.prototype.appendRemoveSelection = function() {
   this.menu.append(new MenuItem({
-    label: 'Remove Selected',
+    label: __('Remove Selected'),
     accelerator: 'Delete',
     enabled: this.opts.state.elementsSelected,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'removeSelection');
     }
   }));
@@ -652,26 +649,26 @@ MenuBuilder.prototype.appendRemoveSelection = function() {
 
 
 MenuBuilder.prototype.appendDmnActions = function() {
-  var activeEditor = this.opts.state.activeEditor;
+  const activeEditor = this.opts.state.activeEditor;
 
   if (activeEditor === 'diagram') {
     // DRD EDITOR
     this.appendSeparator();
 
     this.menu.append(new MenuItem({
-      label: 'Lasso Tool',
+      label: __('Lasso Tool'),
       accelerator: 'L',
       enabled: this.opts.state.inactiveInput,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'lassoTool');
       }
     }));
 
     this.menu.append(new MenuItem({
-      label: 'Edit Label',
+      label: __('Edit Label'),
       accelerator: 'E',
       enabled: this.opts.state.elementsSelected,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'directEditing');
       }
     }));
@@ -679,9 +676,9 @@ MenuBuilder.prototype.appendDmnActions = function() {
     this.appendSeparator();
 
     this.menu.append(new MenuItem({
-      label: 'Select All',
+      label: __('Select All'),
       accelerator: 'CommandOrControl+A',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'selectElements');
       }
     }));
@@ -694,40 +691,40 @@ MenuBuilder.prototype.appendDmnActions = function() {
     this.appendSeparator();
 
     this.menu.append(new MenuItem({
-      label: 'Add Rule..',
+      label: __('ADD_RULE'),
       submenu: Menu.buildFromTemplate([{
         label: 'At End',
         accelerator: 'CommandOrControl+D',
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'ruleAdd');
         }
       }, {
-        label: 'Above Selected',
+        label: __('Above Selected'),
         enabled: this.opts.state.dmnRuleEditing,
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'ruleAddAbove');
         }
       }, {
-        label: 'Below Selected',
+        label: __('Below Selected'),
         enabled: this.opts.state.dmnRuleEditing,
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'ruleAddBelow');
         }
       }])
     }));
 
     this.menu.append(new MenuItem({
-      label: 'Clear Rule',
+      label: __('Clear Rule'),
       enabled: this.opts.state.dmnRuleEditing,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'ruleClear');
       }
     }));
 
     this.menu.append(new MenuItem({
-      label: 'Remove Rule',
+      label: __('Remove Rule'),
       enabled: this.opts.state.dmnRuleEditing,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'ruleRemove');
       }
     }));
@@ -735,17 +732,17 @@ MenuBuilder.prototype.appendDmnActions = function() {
     this.appendSeparator();
 
     this.menu.append(new MenuItem({
-      label: 'Add Clause..',
+      label: __('ADD_CLAUSE'),
       submenu: Menu.buildFromTemplate([{
-        label: 'Input',
-        click: function() {
+        label: __('Input'),
+        click: ()=>{
           app.emit('menu:action', 'clauseAdd', {
             type: 'input'
           });
         }
       }, {
-        label: 'Output',
-        click: function() {
+        label: __('Output'),
+        click: ()=>{
           app.emit('menu:action', 'clauseAdd', {
             type: 'output'
           });
@@ -753,24 +750,24 @@ MenuBuilder.prototype.appendDmnActions = function() {
       }, {
         type: 'separator'
       }, {
-        label: 'Left of selected',
+        label: __('Left of selected'),
         enabled: this.opts.state.dmnClauseEditing,
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'clauseAddLeft');
         }
       }, {
-        label: 'Right of selected',
+        label: __('Right of selected'),
         enabled: this.opts.state.dmnClauseEditing,
-        click: function() {
+        click: ()=>{
           app.emit('menu:action', 'clauseAddRight');
         }
       }])
     }));
 
     this.menu.append(new MenuItem({
-      label: 'Remove Clause',
+      label: __('Remove Clause'),
       enabled: this.opts.state.dmnClauseEditing,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'clauseRemove');
       }
     }));
@@ -778,28 +775,28 @@ MenuBuilder.prototype.appendDmnActions = function() {
     this.appendSeparator();
 
     this.menu.append(new MenuItem({
-      label: 'Insert New Line',
+      label: __('Insert New Line'),
       accelerator: 'CommandOrControl + Enter',
       enabled: this.opts.state.dmnRuleEditing,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'insertNewLine');
       }
     }));
 
     this.menu.append(new MenuItem({
-      label: 'Select Next Row',
+      label: __('Select Next Row'),
       accelerator: 'Enter',
       enabled: this.opts.state.dmnRuleEditing,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'selectNextRow');
       }
     }));
 
     this.menu.append(new MenuItem({
-      label: 'Select Previous Row',
+      label: __('Select Previous Row'),
       accelerator: 'Shift + Enter',
       enabled: this.opts.state.dmnRuleEditing,
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'selectPreviousRow');
       }
     }));
@@ -807,9 +804,9 @@ MenuBuilder.prototype.appendDmnActions = function() {
     this.appendSeparator();
 
     this.menu.append(new MenuItem({
-      label: 'Toggle Editing Mode',
+      label: __('Toggle Editing Mode'),
       accelerator: 'CommandOrControl + M',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'toggleEditingMode');
       }
     }));
@@ -821,33 +818,33 @@ MenuBuilder.prototype.appendDmnActions = function() {
 
 MenuBuilder.prototype.appendSearchActions = function() {
   this.menu.append(new MenuItem({
-    label: 'Find',
+    label: __('Find'),
     accelerator: 'CommandOrControl + F',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'find');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Find Next',
+    label: __('Find Next'),
     accelerator: 'Shift + CommandOrControl + N',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'findNext');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Find Previous',
+    label: __('Find Previous'),
     accelerator: 'Shift + CommandOrControl + P',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'findPrev');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Replace',
+    label: __('Replace'),
     accelerator: 'Shift + CommandOrControl + F',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'replace');
     }
   }));
@@ -855,7 +852,7 @@ MenuBuilder.prototype.appendSearchActions = function() {
 
 MenuBuilder.prototype.appendEditMenu = function() {
   if (this.opts.state.editable) {
-    var builder = new this.constructor(this.opts).appendBaseEditActions();
+    const builder = new this.constructor(this.opts).appendBaseEditActions();
 
     if (this.opts.state.bpmn) {
       builder.appendSeparator();
@@ -880,7 +877,7 @@ MenuBuilder.prototype.appendEditMenu = function() {
     }
 
     this.menu.append(new MenuItem({
-      label: 'Edit',
+      label: __('Edit'),
       submenu: builder.get()
     }));
   }
@@ -890,31 +887,31 @@ MenuBuilder.prototype.appendEditMenu = function() {
 
 MenuBuilder.prototype.appendWindowMenu = function() {
 
-  var submenu = [];
+  const submenu = [];
 
   if (this.opts.state.zoom) {
     submenu.push({
-      label: 'Zoom In',
+      label: __('Zoom In'),
       accelerator: 'CommandOrControl+=',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'zoomIn');
       }
     }, {
-      label: 'Zoom Out',
+      label: __('Zoom Out'),
       accelerator: 'CommandOrControl+-',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'zoomOut');
       }
     }, {
-      label: 'Zoom to Actual Size',
+      label: __('Zoom to Actual Size'),
       accelerator: 'CommandOrControl+0',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'zoom');
       }
     }, {
-      label: 'Zoom to Fit Diagram',
+      label: __('Zoom to Fit Diagram'),
       accelerator: 'CommandOrControl+1',
-      click: function() {
+      click: ()=>{
         app.emit('menu:action', 'zoomFit');
       }
     }, {
@@ -924,7 +921,7 @@ MenuBuilder.prototype.appendWindowMenu = function() {
 
   if (this.opts.state.development || this.opts.state.devtools) {
     submenu.push({
-      label: 'Reload',
+      label: __('Reload'),
       accelerator: 'CommandOrControl+R',
       click: function(menuItem, browserWindow) {
         browserWindow.reload();
@@ -933,11 +930,11 @@ MenuBuilder.prototype.appendWindowMenu = function() {
   }
 
   submenu.push({
-    label: 'Toggle DevTools',
+    label: __('Toggle DevTools'),
     accelerator: 'F12',
     click: (menuItem, browserWindow) => {
 
-      var isDevToolsOpened = browserWindow.isDevToolsOpened();
+      const isDevToolsOpened = browserWindow.isDevToolsOpened();
 
       if (isDevToolsOpened) {
 
@@ -960,7 +957,7 @@ MenuBuilder.prototype.appendWindowMenu = function() {
       }
     }
   }, {
-    label: 'Fullscreen',
+    label: __('Fullscreen'),
     accelerator: 'F11',
     click: function(menuItem, browserWindow) {
       if (browserWindow.isFullScreen()) {
@@ -974,7 +971,7 @@ MenuBuilder.prototype.appendWindowMenu = function() {
 
   if (app.mainWindow) {
     this.menu.append(new MenuItem({
-      label: 'Window',
+      label: __('Window'),
       submenu: Menu.buildFromTemplate(submenu)
     }));
   }
@@ -983,22 +980,23 @@ MenuBuilder.prototype.appendWindowMenu = function() {
 
 MenuBuilder.prototype.appendHelpMenu = function(submenu) {
   this.menu.append(new MenuItem({
-    label: 'Help',
+    label: __('Help'),
     submenu: submenu || Menu.buildFromTemplate([
       {
-        label: 'Documentation',
-        click: function() {
+        label: __('Documentation'),
+        click: ()=>{
           browserOpen('https://docs.camunda.org/manual/latest/modeler/camunda-modeler');
         }
       },
+      /*
       {
         label: 'User Forum',
-        click: function() {
+        click: ()=>{
           browserOpen('https://forum.camunda.org/c/modeler');
         }
-      },
+      },*/
       {
-        label: 'Keyboard Shortcuts',
+        label: __('Keyboard Shortcuts'),
         click: function(menuItem, browserWindow) {
           app.emit('menu:action', 'show-shortcuts');
         }
@@ -1006,15 +1004,16 @@ MenuBuilder.prototype.appendHelpMenu = function(submenu) {
       {
         type: 'separator'
       },
+      /*
       {
         label: 'BPMN 2.0 Tutorial',
-        click: function() {
+        click: ()=>{
           browserOpen('https://camunda.org/bpmn/tutorial/');
         }
       },
       {
         label: 'BPMN Modeling Reference',
-        click: function() {
+        click: ()=>{
           browserOpen('https://camunda.org/bpmn/reference/');
         }
       },
@@ -1023,7 +1022,7 @@ MenuBuilder.prototype.appendHelpMenu = function(submenu) {
       },
       {
         label: 'DMN 1.1 Tutorial',
-        click: function() {
+        click: ()=>{
           browserOpen('https://camunda.org/dmn/tutorial/');
         }
       },
@@ -1032,21 +1031,22 @@ MenuBuilder.prototype.appendHelpMenu = function(submenu) {
       },
       {
         label: 'CMMN 1.1 Tutorial',
-        click: function() {
+        click: ()=>{
           browserOpen('https://docs.camunda.org/get-started/cmmn11/');
         }
       },
       {
         label: 'CMMN Modeling Reference',
-        click: function() {
+        click: ()=>{
           browserOpen('https://docs.camunda.org/manual/latest/reference/cmmn11/');
         }
       },
       {
         type: 'separator'
       },
+      */
       {
-        label: 'Version ' + app.version,
+        label: __('Version ') + app.version,
         enabled: false
       }
     ])
@@ -1092,32 +1092,31 @@ MenuBuilder.prototype.build = function() {
 
 MenuBuilder.prototype.setMenu = function() {
   Menu.setApplicationMenu(this.menu);
-
   return this;
 };
 
 MenuBuilder.prototype.appendContextCloseTab = function(attrs) {
   this.menu.append(new MenuItem({
-    label: 'Close Tab',
+    label: __('Close Tab'),
     enabled: this.opts.state.closable,
     accelerator: 'CommandOrControl+W',
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'close-tab', attrs);
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Close All Tabs',
+    label: __('Close All Tabs'),
     enabled: this.opts.state.closable,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'close-all-tabs');
     }
   }));
 
   this.menu.append(new MenuItem({
-    label: 'Close Other Tabs',
+    label: __('Close Other Tabs'),
     enabled: this.opts.state.closable,
-    click: function() {
+    click: ()=>{
       app.emit('menu:action', 'close-other-tabs', attrs);
     }
   }));

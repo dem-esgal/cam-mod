@@ -1,11 +1,8 @@
-'use strict';
-
-var path = require('path');
-
-var map = require('lodash/collection/map');
-
-var filterExtensions = require('./util/filter-extensions'),
-    ensureOptions = require('./util/ensure-opts');
+const path = require('path'),
+      map = require('lodash/collection/map'),
+      filterExtensions = require('./util/filter-extensions'),
+      ensureOptions = require('./util/ensure-opts'),
+      __ = require('./locales/').__;
 
 /**
  * Interface for handling dialogs.
@@ -25,9 +22,9 @@ module.exports = Dialog;
 
 
 Dialog.prototype.getDialogOptions = function(type, opts) {
-  var config = this.config,
-      userDesktopPath = this.userDesktopPath,
-      defaultPath;
+  const config = this.config,
+        userDesktopPath = this.userDesktopPath;
+  let defaultPath;
 
   // filepath is passed if a saved file is focused
   if (opts && opts.filePath) {
@@ -37,20 +34,20 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
   }
 
   this._dialogs = {
-    contentChanged: function() {
+    contentChanged: ()=>{
       return {
-        title: 'File changed',
-        message: 'The file has been changed externally.\nWould you like to reload it?',
+        title: __('File changed'),
+        message: __('FILE_CHANGED_MSG'),
         type: 'question',
         buttons: [
-          { id: 'ok', label: 'Reload' },
-          { id: 'cancel', label: 'Cancel' }
+          { id: 'ok', label: __('Reload') },
+          { id: 'cancel', label: __('Cancel') }
         ]
       };
     },
-    open: function() {
+    open: ()=>{
       return {
-        title: 'Open diagram',
+        title: __('Open diagram'),
         defaultPath: defaultPath,
         properties: [ 'openFile', 'multiSelections' ],
         filters: filterExtensions([ 'supported', 'bpmn', 'dmn', 'cmmn', 'all','war' ])
@@ -60,7 +57,7 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
       ensureOptions([ 'name', 'fileType' ], options);
 
       return {
-        title: 'Save ' + options.name + ' as..',
+        title: __('Save ') + options.name + __('AS'),
         defaultPath: defaultPath + '/' + options.name,
         filters: filterExtensions([ options.fileType, 'all' ])
       };
@@ -69,13 +66,13 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
       ensureOptions([ 'name' ], options);
 
       return {
-        title: 'Close diagram',
-        message: 'Save changes to ' + options.name + ' before closing?',
+        title: __('Close diagram'),
+        message: __('Save changes to ') + options.name + __(' before closing?'),
         type: 'question',
         buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'save', label: 'Save' },
-          { id: 'discard', label: 'Don\'t Save' }
+          { id: 'cancel', label: __('Cancel') },
+          { id: 'save', label: __('Save') },
+          { id: 'discard', label: __('Don\'t Save') }
         ]
       };
     },
@@ -84,18 +81,18 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
 
       return {
         type: 'error',
-        title: 'Importing Error',
+        title: __('Importing Error'),
         buttons: [
-          { id: 'cancel', label: 'Close' },
-          { id: 'ask-forum', label: 'Ask in Forum' }
+          { id: 'cancel', label: __('Close') },
+          { id: 'ask-forum', label: __('Ask in Forum') }
         ],
-        message: 'Ooops, we could not display this diagram!',
+        message: __('Ooops, we could not display this diagram!'),
         detail: [
           options.errorDetails,
           '',
-          'Do you believe "' + options.name + '" is valid BPMN or DMN diagram?',
+          __('Do you believe "') + options.name + __('" is valid BPMN or DMN diagram?'),
           '',
-          'Post this error with your diagram in our forum for help.'
+          ''
         ].join('\n')
       };
     },
@@ -104,11 +101,11 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
 
       return {
         type: 'warning',
-        title: 'Unrecognized file format',
+        title: __('Unrecognized file format'),
         buttons: [
           { id: 'cancel', label: 'Close' }
         ],
-        message: 'The file "' + options.name + '" is not a BPMN, DMN or CMMN file.'
+        message: __('The file "') + options.name + __('" is not a BPMN, DMN or CMMN file.')
       };
     },
     existingFile: function(options) {
@@ -116,17 +113,17 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
 
       return {
         type: 'warning',
-        title: 'Existing file',
+        title: __('Existing file'),
         buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'no-overwrite', label: 'No' },
-          { id: 'overwrite', label: 'Overwrite' }
+          { id: 'cancel', label: __('Cancel') },
+          { id: 'no-overwrite', label: __('No') },
+          { id: 'overwrite', label: __('Overwrite') }
         ],
-        message: 'The file "' + options.name + '" already exists. Do you want to overwrite it?'
+        message: __('The file "') + options.name + __('" already exists. Do you want to overwrite it?')
       };
     },
     namespace: function(options) {
-      var oldNs = '',
+      let oldNs = '',
           newNs = '',
           details = [];
 
@@ -137,9 +134,9 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
         newNs = '<camunda>';
 
         details = [
-          'This will allow you to maintain execution related properties.',
+          __('This will allow you to maintain execution related properties.'),
           '',
-          '<camunda> namespace support works from Camunda BPM versions 7.4.0, 7.3.3, 7.2.6 onwards.'
+          __('<camunda> namespace support works from Camunda BPM versions 7.4.0, 7.3.3, 7.2.6 onwards.')
         ];
       }
 
@@ -150,27 +147,27 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
 
       return {
         type: 'warning',
-        title: 'Deprecated ' + oldNs + ' namespace detected',
+        title: __('Deprecated ') + oldNs + __(' namespace detected'),
         buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'no', label: 'No' },
-          { id: 'yes', label: 'Yes' }
+          { id: 'cancel', label: __('Cancel') },
+          { id: 'no', label: __('No') },
+          { id: 'yes', label: __('Yes') }
         ],
-        message: 'Would you like to convert your diagram to the ' + newNs + ' namespace?',
+        message: __('DEPRECATED_NS',{ newNs:newNs }),
         detail: details.join('\n')
       };
     },
     savingDenied: function(options) {
       return {
         type: 'warning',
-        title: 'Cannot save file',
+        title: __('Cannot save file'),
         buttons: [
-          { id: 'cancel', label: 'Cancel' },
-          { id: 'save-as', label: 'Save File as..' }
+          { id: 'cancel', label: __('Cancel') },
+          { id: 'save-as', label: __('SAVE_FILE_AS') }
         ],
         message: [
-          'We cannot save or overwrite the current file.',
-          'Do you want to save the file as.. ?'
+          __('We cannot save or overwrite the current file.'),
+          __('SAVE_FILE_CONFIRM')
         ].join('\n')
       };
     }
@@ -180,7 +177,7 @@ Dialog.prototype.getDialogOptions = function(type, opts) {
 };
 
 Dialog.prototype.setDefaultPath = function(filenames) {
-  var config = this.config,
+  let config = this.config,
       defaultPath,
       dirname;
 
@@ -202,16 +199,16 @@ Dialog.prototype.setDefaultPath = function(filenames) {
 };
 
 Dialog.prototype.showDialog = function(type, opts, done) {
-  var self = this;
+  const self = this;
 
   if (typeof opts === 'function') {
     done = opts;
     opts = undefined;
   }
 
-  var dialog = this.dialog,
-      dialogOptions = this.getDialogOptions(type, opts),
-      buttons = dialogOptions.buttons;
+  const dialog = this.dialog,
+        dialogOptions = this.getDialogOptions(type, opts),
+        buttons = dialogOptions.buttons;
 
   // windows needs this property
   dialogOptions.noLink = true;
@@ -227,7 +224,7 @@ Dialog.prototype.showDialog = function(type, opts, done) {
   };
 
   function dialogCallback(answer) {
-    var result;
+    let result;
 
     if (type !== 'open' && type !== 'save') {
       // get the button ID according to the result
@@ -256,8 +253,8 @@ Dialog.prototype.showDialog = function(type, opts, done) {
   }
 };
 
-Dialog.prototype.showGeneralErrorDialog = function() {
-  var dialog = this.dialog;
+Dialog.prototype.showGeneralErrorDialog = ()=>{
+  const dialog = this.dialog;
 
-  dialog.showErrorBox('Error', 'There was an internal error.' + '\n' + 'Please try again.');
+  dialog.showErrorBox('Error', __('There was an internal error.') + '\n' + __('Please try again.'));
 };

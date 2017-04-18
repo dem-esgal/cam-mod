@@ -1,33 +1,26 @@
-'use strict';
 
-var inherits = require('inherits');
+const inherits = require('inherits'),
+      assign = require('lodash/object/assign'),
+      domify = require('domify'),
+      DiagramEditor = require('./diagram-editor'),
+      CmmnJS = require('cmmn-js/lib/Modeler'),
+      DiagramJSOrigin = require('diagram-js-origin'),
+      propertiesPanelModule = require('cmmn-js-properties-panel'),
+      propertiesProviderModule = require('cmmn-js-properties-panel/lib/provider/camunda'),
+      camundaModdlePackage = require('camunda-cmmn-moddle/resources/camunda'),
+      WarningsOverlay = require('base/components/warnings-overlay'),
+      getWarnings = require('app/util/get-warnings');
 
-var assign = require('lodash/object/assign');
+const ensureOpts = require('util/ensure-opts'),
+      dragger = require('util/dom/dragger'),
+      isInputActive = require('util/dom/is-input').active,
+      copy = require('util/copy');
 
-var domify = require('domify');
+const generateImage = require('app/util/generate-image');
 
-var DiagramEditor = require('./diagram-editor');
+const debug = require('debug')('cmmn-editor');
 
-var CmmnJS = require('cmmn-js/lib/Modeler');
-
-var DiagramJSOrigin = require('diagram-js-origin'),
-    propertiesPanelModule = require('cmmn-js-properties-panel'),
-    propertiesProviderModule = require('cmmn-js-properties-panel/lib/provider/camunda'),
-    camundaModdlePackage = require('camunda-cmmn-moddle/resources/camunda');
-
-var WarningsOverlay = require('base/components/warnings-overlay');
-
-var getWarnings = require('app/util/get-warnings');
-
-var ensureOpts = require('util/ensure-opts'),
-    dragger = require('util/dom/dragger'),
-    isInputActive = require('util/dom/is-input').active,
-    copy = require('util/copy');
-
-var generateImage = require('app/util/generate-image');
-
-var debug = require('debug')('cmmn-editor');
-
+const __ = require('./../../../locales/').__;
 
 /**
  * A CMMN 1.1 diagram editing component.
@@ -357,7 +350,7 @@ CmmnEditor.prototype.render = function() {
              draggable="true"
              onClick={ this.compose('toggleProperties') }
              onDragstart={ dragger(this.compose('resizeProperties', copy(propertiesLayout))) }>
-          Properties Panel
+          {__('Properties Panel')}
         </div>
         <div className="resize-handle"
              draggable="true"

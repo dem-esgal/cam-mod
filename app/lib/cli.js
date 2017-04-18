@@ -3,7 +3,6 @@
 var fs = require('fs'),
     path = require('path');
 
-
 /**
  * Parse file arguments from the command line
  * and return them as a list of paths.
